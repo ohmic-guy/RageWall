@@ -7,17 +7,27 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 
-df = pd.read_csv("../data/traffic_data_labeled.csv")
+df = pd.read_csv("traffic_data_labeled.csv")
 print("Loaded labeled data from traffic_data_labeled.csv")
 
 
-features_to_drop = ['src_ip', 'dst_ip']
-df = df.drop(columns=features_to_drop)
-print("Dropped non-numeric columns:", features_to_drop)
-
-
+# Feature engineering
 df['length_log'] = np.log1p(df['length'])
 df['ttl_bins'] = pd.qcut(df['ttl'], q=5, labels=False, duplicates='drop')
+df['length_bin'] = pd.qcut(df['length'], q=5, labels=False, duplicates='drop')
+df['src_ip_freq'] = df['src_ip'].map(df['src_ip'].value_counts())
+df['dst_ip_freq'] = df['dst_ip'].map(df['dst_ip'].value_counts())
+df['ttl_outlier'] = ((df['ttl'] < 32) | (df['ttl'] > 128)).astype(int)
+
+# Time-based features
+if 'timestamp' in df.columns:
+    df['hour'] = pd.to_datetime(df['timestamp']).dt.hour
+    df['weekday'] = pd.to_datetime(df['timestamp']).dt.weekday
+
+# Drop non-numeric columns
+features_to_drop = ['src_ip', 'dst_ip', 'timestamp']
+df = df.drop(columns=[col for col in features_to_drop if col in df.columns])
+print("Dropped non-numeric columns:", features_to_drop)
 
 
 X = df.drop("label", axis=1)
@@ -37,8 +47,6 @@ X_train, X_test, y_train, y_test = train_test_split(
 param_grid = {
     'n_estimators': [100, 200],
     'max_depth': [10, 20, None],
-    'min_samples_split': [2, 5],
-    'min_samples_leaf': [1, 2],
     'class_weight': ['balanced']
 }
 print("Starting GridSearchCV for Random Forest...")
