@@ -1,0 +1,29 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+
+# Ignore all files in data/ and models/
+data/*
+models/*
+
+# But keep the folders themselves
+!data/
+!models/
+
+# (Optional) Ignore logs and other common files
+*.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+env/
+venv/
+.DS_Store
+Thumbs.db
